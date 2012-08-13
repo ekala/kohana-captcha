@@ -29,7 +29,8 @@ abstract class Captcha
 		'width'      	=> 150,
 		'height'     	=> 50,
 		'complexity' 	=> 4,
-		'background' 	=> '',
+		'color'         => '#54C2D5',
+		'background' 	=> '#FFFFFF',
 		'fontpath'   	=> '',
 		'fonts'      	=> array(),
 		'promote'    	=> FALSE,
@@ -360,8 +361,6 @@ abstract class Captcha
 	 * array([0 - 255], [0 - 255], [0 - 255]) with the array elements
 	 * representing red, green and blue respectively
 	 *
-	 * Where the values of R, G and B are between 0 and 255
-	 *
 	 * @param  string  $hex   Hex value of the color
 	 * @return array
 	 */
@@ -465,7 +464,7 @@ abstract class Captcha
 		);
 
 		// Send HTTP request with the correct headers
-        Request::factory()
+		Request::factory()
 		    ->headers($headers);
 
 		// Pick the correct output function
