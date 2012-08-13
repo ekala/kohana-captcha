@@ -19,15 +19,17 @@
 
 return array(
 	'default' => array(
-		'style'      	=> 'alpha',
-		'width'      	=> 150,
-		'height'     	=> 50,
+		'style'         => 'alpha',
+		'width'         => 150,
+		'height'        => 50,
 		'complexity' 	=> 8,
-		'background' 	=> '',
-		'fontpath'   	=> MODPATH.'captcha/fonts/',
-		'fonts'      	=> array('DejaVuSerif.ttf'),
-		'promote'    	=> FALSE,
+		'color'         => "#259CB5",    // Text color of the captcha
+		'background'    => '#FFFFFF',    // Background color
+		'fontpath'      => MODPATH.'captcha/fonts/',
+		'fonts'         => array('DejaVuSerif.ttf'),
+		'promote'       => FALSE,
 	),
+
 	// Words of varying length for Captcha_Word to pick from
 	// Note: use only alphanumeric characters
 	'words' => array
@@ -41,6 +43,7 @@ return array(
 		'aircraft', 'computer', 'laughter', 'alphabet', 'kangaroo', 'spelling',
 		'architect', 'president', 'cockroach', 'encounter', 'terrorism', 'cylinders',
 	),
+
 	// Riddles for Captcha_Riddle to pick from
 	// Note: use only alphanumeric characters
 	'riddles' => array

@@ -123,14 +123,26 @@ abstract class Captcha
 		// Store the config group name as well, so the drivers can access it
 		Captcha::$config['group'] = $group;
 
-		// If using a background image, check if it exists
+		// Check for background color
 		if ( ! empty($config['background']))
 		{
-			Captcha::$config['background'] = realpath($config['background']).DIRECTORY_SEPARATOR;
+			Captcha::$config['background'] = $config['background'];
+		}
 
-			if ( ! is_file(Captcha::$config['background']))
-				throw new Kohana_Exception('The specified file, :file, was not found.',
-					array(':file' => Captcha::$config['background']));
+		// Check for text color
+		if ( ! empty($config['color']))
+		{
+			Captcha::$config['color'] = $config['color'];
+		}
+		else
+		{
+			// Generate a random text color
+			$text_color = "";
+			for ($i = 0; $i < 3; $i++)
+			{
+				$text_color .= dechex(mt_rand(0, 255));
+			}
+			Captcha::$config['color'] = $text_color;
 		}
 
 		// If using any fonts, check if they exist
@@ -321,7 +333,7 @@ abstract class Captcha
 	 * If a background image is supplied, the image dimensions are used.
 	 *
 	 * @throws Kohana_Exception If no GD2 support
-	 * @param string $background Path to the background image file
+	 * @param string $background Background color for the image captcha
 	 * @return void
 	 */
 	public function image_create($background = NULL)
@@ -333,28 +345,34 @@ abstract class Captcha
 		// Create a new image (black)
 		$this->image = imagecreatetruecolor(Captcha::$config['width'], Captcha::$config['height']);
 
-		// Use a background image
+		// Use a background color for the captcha image
 		if ( ! empty($background))
 		{
-			// Create the image using the right function for the filetype
-			$function = 'imagecreatefrom'.$this->image_type($background);
-			$this->background_image = $function($background);
-
-			// Resize the image if needed
-			if (imagesx($this->background_image) !== Captcha::$config['width']
-			    or imagesy($this->background_image) !== Captcha::$config['height'])
-			{
-				imagecopyresampled
-				(
-					$this->image, $this->background_image, 0, 0, 0, 0,
-					Captcha::$config['width'], Captcha::$config['height'],
-					imagesx($this->background_image), imagesy($this->background_image)
-				);
-			}
-
-			// Free up resources
-			imagedestroy($this->background_image);
+			list($r, $g, $b) = $this->hex2rgb($background);
+			$bg_color = imagecolorallocate($this->image, $r, $g, $b);
+			imagefill($this->image, 0, 0, $bg_color);
 		}
+	}
+
+	/**
+	 * Given a hexadecimal value of a color, returns an array
+	 * with it's RGB values. The return value is of the format:
+	 * array([0 - 255], [0 - 255], [0 - 255]) with the array elements
+	 * representing red, green and blue respectively
+	 *
+	 * Where the values of R, G and B are between 0 and 255
+	 *
+	 * @param  string  $hex   Hex value of the color
+	 * @return array
+	 */
+	protected function hex2rgb($color)
+	{
+		$color = strpos($color, "#") !== 0 ? $color : substr($color, 1, 7);
+		return array(
+			hexdec(substr($color, 0, 2)),
+			hexdec(substr($color, 2, 2)),
+			hexdec(substr($color, 4, 2))
+		);
 	}
 
 	/**
@@ -431,7 +449,7 @@ abstract class Captcha
 	{
 		// Output html element
 		if ($html === TRUE)
-			return HTML::image(URL::site('captcha/'.Captcha::$config['group']), array(
+			return HTML::image(URL::site('captcha/'.Captcha::$config['group'], TRUE), array(
 				"width" => Captcha::$config['width'],
 				"height" => Captcha::$config["height"],
 				"alt" => "Security code",
@@ -448,8 +466,7 @@ abstract class Captcha
 
 		// Send HTTP request with the correct headers
         Request::factory()
-		    ->headers($headers)
-		    ->execute();
+		    ->headers($headers);
 
 		// Pick the correct output function
 		$function = 'image'.$this->image_type;
