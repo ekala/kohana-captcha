@@ -126,7 +126,7 @@ abstract class Captcha
 		// If using a background image, check if it exists
 		if ( ! empty($config['background']))
 		{
-			Captcha::$config['background'] = str_replace('\\', '/', realpath($config['background']));
+			Captcha::$config['background'] = realpath($config['background']).DIRECTORY_SEPARATOR;
 
 			if ( ! is_file(Captcha::$config['background']))
 				throw new Kohana_Exception('The specified file, :file, was not found.',
@@ -136,7 +136,7 @@ abstract class Captcha
 		// If using any fonts, check if they exist
 		if ( ! empty($config['fonts']))
 		{
-			Captcha::$config['fontpath'] = str_replace('\\', '/', realpath($config['fontpath'])).'/';
+			Captcha::$config['fontpath'] = realpath($config['fontpath']).DIRECTORY_SEPARATOR;
 
 			foreach ($config['fonts'] as $font)
 			{
@@ -431,13 +431,25 @@ abstract class Captcha
 	{
 		// Output html element
 		if ($html === TRUE)
-			return '<img src="'.url::site('captcha/'.Captcha::$config['group']).'" width="'.Captcha::$config['width'].'" height="'.Captcha::$config['height'].'" alt="Captcha" class="captcha" />';
+			return HTML::image(URL::site('captcha/'.Captcha::$config['group']), array(
+				"width" => Captcha::$config['width'],
+				"height" => Captcha::$config["height"],
+				"alt" => "Security code",
+				"class" => "captcha"
+			));
 
-		// Send the correct HTTP header
-        Request::instance()->headers['Content-Type'] = 'image/'.$this->image_type;
-        Request::instance()->headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
-        Request::instance()->headers['Pragma'] = 'no-cache';
-        Request::instance()->headers['Connection'] = 'close';
+		// HTTP headers
+		$headers = array(
+		    'Content-Type' => 'image/'.$this->image_type,
+		    'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+		    'Pragma' => 'no-cache',
+		    'Connection' => 'close'
+		);
+
+		// Send HTTP request with the correct headers
+        Request::factory()
+		    ->headers($headers)
+		    ->execute();
 
 		// Pick the correct output function
 		$function = 'image'.$this->image_type;

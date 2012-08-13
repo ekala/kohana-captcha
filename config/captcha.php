@@ -22,7 +22,7 @@ return array(
 		'style'      	=> 'alpha',
 		'width'      	=> 150,
 		'height'     	=> 50,
-		'complexity' 	=> 4,
+		'complexity' 	=> 8,
 		'background' 	=> '',
 		'fontpath'   	=> MODPATH.'captcha/fonts/',
 		'fonts'      	=> array('DejaVuSerif.ttf'),
