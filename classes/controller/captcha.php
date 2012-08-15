@@ -44,7 +44,7 @@ class Controller_Captcha extends Controller {
 		);
 
 		// Set the response headers
-		$this->request->headers($headers);
+		$this->response->headers($headers);
 		$captcha->render(FALSE);
 	}
 	
