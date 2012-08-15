@@ -31,7 +31,21 @@ class Controller_Captcha extends Controller {
 		
 		// Output the Captcha challenge resource (no html)
 		// Pull the config group name from the URL
-		Captcha::instance($group)->render(FALSE);
+		
+		// Initalize the captcha
+		$captcha = Captcha::instance($group);
+
+		// HTTP headers
+		$headers = array(
+		    'Content-Type' => 'image/'.$captcha->image_type(),
+		    'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+		    'Pragma' => 'no-cache',
+		    'Connection' => 'close'
+		);
+
+		// Set the response headers
+		$this->request->headers($headers);
+		$captcha->render(FALSE);
 	}
 	
 	public function after()

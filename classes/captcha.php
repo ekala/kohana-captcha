@@ -309,23 +309,32 @@ abstract class Captcha
 	 * @param string $filename Filename
 	 * @return string|boolean Image type ("png", "gif" or "jpeg")
 	 */
-	public function image_type($filename)
+	public function image_type($filename = NULL)
 	{
-		switch (strtolower(substr(strrchr($filename, '.'), 1)))
+		// If no filename has been specified, return
+		// the default image type
+		if (empty($filename))
 		{
-			case 'png':
-				return 'png';
+			return $this->image_type;
+		}
+		else
+		{
+			switch (strtolower(substr(strrchr($filename, '.'), 1)))
+			{
+				case 'png':
+					return 'png';
 
-			case 'gif':
-				return 'gif';
+				case 'gif':
+					return 'gif';
 
-			case 'jpg':
-			case 'jpeg':
-				// Return "jpeg" and not "jpg" because of the GD2 function names
-				return 'jpeg';
+				case 'jpg':
+				case 'jpeg':
+					// Return "jpeg" and not "jpg" because of the GD2 function names
+					return 'jpeg';
 
-			default:
-				return FALSE;
+				default:
+					return FALSE;
+			}
 		}
 	}
 
@@ -454,18 +463,6 @@ abstract class Captcha
 				"alt" => "Security code",
 				"class" => "captcha"
 			));
-
-		// HTTP headers
-		$headers = array(
-		    'Content-Type' => 'image/'.$this->image_type,
-		    'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
-		    'Pragma' => 'no-cache',
-		    'Connection' => 'close'
-		);
-
-		// Send HTTP request with the correct headers
-		Request::factory()
-		    ->headers($headers);
 
 		// Pick the correct output function
 		$function = 'image'.$this->image_type;
